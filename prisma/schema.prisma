@@ -7,17 +7,11 @@ generator client {
 
 generator zod {
   provider              = "zod-prisma"
-  output                = "./zod" // (default) the directory where generated zod schemas will be saved
-  relationModel         = true // (default) Create and export both plain and related models.
-  modelCase             = "camelCase" // Output models using camel case (ex. userModel, postModel)
-  modelSuffix           = "Schema" // (default) Suffix to apply to your prisma models when naming Zod schemas
-  useDecimalJs          = true // represent the prisma Decimal type using Decimal.js (as Prisma does)
-  prismaJsonNullability = true // (default) uses prisma's scheme for JSON field nullability
+ 
 }
 
 datasource db {
-  provider = "mysql"
-  relationMode = "prisma"
+  provider = "postgres"
   url      = env("DATABASE_URL")
 }
 
@@ -59,6 +53,8 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
+  gamesAsPlayerOne  Games[] @relation(name:"playerOne")
+  gamesAsPlayerTwo  Games[] @relation(name:"playerTwo")
 }
 
 model VerificationToken {
@@ -67,4 +63,14 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Games {
+  id  String @id @default(cuid())
+  playerOneId String
+  playerOne User @relation(name: "playerOne", fields: [playerOneId], references: [id], onDelete: Cascade)
+  playerTwoId String?
+  playerTwo User? @relation(name: "playerTwo", fields: [playerTwoId], references: [id], onDelete: Cascade)
+  Board String
+
 }

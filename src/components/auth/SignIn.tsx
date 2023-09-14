@@ -10,14 +10,12 @@ export default function SignIn() {
   if (session) {
     return (
       <>
-        Signed in as {session.user?.email} <br />
         <Button variant={"destructive"} onClick={() => signOut()}>Sign out</Button>
       </>
     );
   }
   return (
     <>
-      Not signed in <br />
       <Button onClick={() => signIn()}>Sign in</Button>
     </>
   );

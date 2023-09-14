@@ -1,8 +1,8 @@
-import { computersRouter } from "./computers";
+import { chessRouter } from "./computers";
 import { router } from "../trpc";
 
 export const appRouter = router({
-  computers: computersRouter,
+  chessGames: chessRouter,
 });
 
 export type AppRouter = typeof appRouter;
