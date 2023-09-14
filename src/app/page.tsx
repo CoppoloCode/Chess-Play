@@ -2,7 +2,6 @@
 import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc/client";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 
@@ -12,13 +11,15 @@ export default function Home() {
   const user = useSession();
   const router = useRouter();
   const createBoard = trpc.chessGames.createGame.useMutation();
-
+  
   async function generateLocalGame(){
     const userId = user?.data?.user.id;
-    const board = ""
+    const board = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    
     if(!userId){
       return null
     }
+    
     const res = await createBoard.mutateAsync({userId,board})
     router.replace(`/localgame/${res.id}`);
   }

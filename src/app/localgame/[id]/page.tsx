@@ -1,10 +1,9 @@
 "use client"
 import { trpc } from "@/lib/trpc/client"
 import { useParams } from "next/navigation"
-import {Chess } from "chess.js"
-import { useEffect } from "react"
-
-
+import  Chess, {ShortMove, Square, } from "chess.js"
+import { Chessboard } from "react-chessboard"
+import { useState } from "react"
 
 
 export default function LocalGame(){
@@ -21,14 +20,36 @@ export default function LocalGame(){
     }
 
     const boardQuery = trpc.chessGames.getGames.useQuery({boardId}).data
-    console.log(boardQuery?.Board)
-    const game = new Chess()
     
-    
+    const [game, setGame] = useState(Chess(boardQuery?.Board))
 
-    return (
+    function makeAMove(move: string | ShortMove){
+        const gameCopy = {...game};
+        const result = gameCopy.move(move);
+        setGame(gameCopy);
+        return result; // null if the move was illegal, the move object if the move was legal
+    }
+    
+    function onDrop(sourceSquare: Square, targetSquare: Square) {
+        const move = makeAMove({
+          from: sourceSquare,
+          to: targetSquare,
+          promotion: "q", // always promote to a queen for example simplicity
+          
+        });
+    
+        // illegal move
+        if (move === null) return false;
+
+        return true;
+      }
+
+    return (<>
         <section className="flex h-full w-full justify-center items-center">
-            {game.ascii()}
+            <div>
+                <Chessboard boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
+            </div>
         </section>
+        </>
     )
 }

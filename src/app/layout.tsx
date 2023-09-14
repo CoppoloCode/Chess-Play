@@ -21,6 +21,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+       
       <body className={"flex flex-col w-screen h-screen"}>
         <NextAuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
