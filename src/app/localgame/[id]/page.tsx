@@ -21,6 +21,7 @@ export default function LocalGame(){
 
     const boardQuery = trpc.chessGames.getGames.useQuery({boardId}).data
     
+    //@ts-ignore
     const [game, setGame] = useState(Chess(boardQuery?.Board))
 
     function makeAMove(move: string | ShortMove){
