@@ -4,6 +4,7 @@ import { CompleteUser, RelatedUserModel } from "./index"
 export const GamesModel = z.object({
   id: z.string(),
   playerOneId: z.string(),
+  playerOneColor: z.string().nullish(),
   playerTwoId: z.string().nullish(),
   Board: z.string(),
 })

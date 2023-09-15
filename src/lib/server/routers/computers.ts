@@ -14,6 +14,16 @@ export const chessRouter = router({
     const {userId, board} = opts.input;
     const res = await  db.games.create({data: {playerOneId: userId, Board: board}})
     return res
+  }),
+  setColor: publicProcedure.input(z.object({boardId: z.string(), color: z.string()})).mutation(async (opts)=>{
+    const {boardId, color} = opts.input;
+    const res = await db.games.update({where: {id: boardId}, data:{playerOneColor: color}})
+    return res;
+  }),
+  updateBoard: publicProcedure.input(z.object({boardId: z.string(), board: z.string()})).mutation(async (opts)=>{
+    const {boardId, board} = opts.input;
+    const res = await db.games.update({where: {id: boardId}, data: {Board: board}});
+    return res;
   })
 
 })

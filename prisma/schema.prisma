@@ -69,6 +69,7 @@ model Games {
   id  String @id @default(cuid())
   playerOneId String
   playerOne User @relation(name: "playerOne", fields: [playerOneId], references: [id], onDelete: Cascade)
+  playerOneColor String?
   playerTwoId String?
   playerTwo User? @relation(name: "playerTwo", fields: [playerTwoId], references: [id], onDelete: Cascade)
   Board String
