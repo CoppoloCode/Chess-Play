@@ -54,13 +54,16 @@ export default function LocalGame(){
             
         }
         if(boardQuery){
-            //@ts-ignore
-            setGame(Chess(boardQuery.Board))
-            console.log(game)
-            setAiTurn(game.turn() === boardQuery.playerOneColor ? false : true)
+           
+            setGame((prev: typeof Chess)=>{
+                //@ts-ignore
+                const game = Chess(boardQuery.Board)
+                setAiTurn(game.turn() === boardQuery.playerOneColor ? false : true)
+                return game
+            })
+            
+            
         }
-        
-        
 
     },[boardQuery])
 
