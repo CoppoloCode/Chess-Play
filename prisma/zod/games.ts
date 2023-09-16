@@ -6,7 +6,8 @@ export const GamesModel = z.object({
   playerOneId: z.string(),
   playerOneColor: z.string().nullish(),
   playerTwoId: z.string().nullish(),
-  Board: z.string(),
+  ai: z.number().int().nullish(),
+  board: z.string(),
 })
 
 export interface CompleteGames extends z.infer<typeof GamesModel> {

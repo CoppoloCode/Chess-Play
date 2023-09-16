@@ -1,13 +1,12 @@
 import './global.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import NextAuthProvider from "@/lib/auth/Provider";
 import TrpcProvider from "@/lib/trpc/Provider";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/ui/theme-provider"
 import Header from '@/components/app/header';
 
-const inter = Inter({ subsets: ['latin'] })
+
 
 export const metadata: Metadata = {
   title: 'Chess Play',
@@ -20,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
        
       <body className={"flex flex-col w-screen h-screen"}>
         <NextAuthProvider>

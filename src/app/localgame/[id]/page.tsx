@@ -9,15 +9,19 @@ import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { BoardOrientation, Piece } from "react-chessboard/dist/chessboard/types"
+import Link from "next/link"
+import { Input } from "@/components/ui/input"
 
-const START_POS = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 export default function LocalGame(){
 
     const params = useParams()
     const boardId = params.id as string;
     const [pickColor, setPickColor] = useState(true);
+    const [playerColor, setPlayerColor] = useState<string>("")
     const [boardPosition, setBoardPosition] = useState<BoardOrientation>('white');
+    const [gameOver, setGameOver] = useState(false);
+    const [aiDifficulty, setAiDifficulty] = useState<number>(0);
 
     
 
@@ -29,9 +33,10 @@ export default function LocalGame(){
         )
     }
 
-    const boardQuery = trpc.chessGames.getGames.useQuery({boardId}).data
+    const boardQuery = trpc.chessGames.getGame.useQuery({boardId})
     const colorQuery = trpc.chessGames.setColor.useMutation();
     const updateBoardQuery = trpc.chessGames.updateBoard.useMutation();
+    const deleteBoardQuery = trpc.chessGames.removeBoard.useMutation();
 
      //@ts-ignore
     const [game, setGame] = useState<Chess | undefined>()
@@ -39,37 +44,39 @@ export default function LocalGame(){
    
    useEffect(()=>{
     
-       if(aiTurn){
+       if(aiTurn && !gameOver){
            makeAiMove();
        }
+
    },[aiTurn])
 
-    useEffect(()=>{
+   useEffect(()=>{
         
-        if(boardQuery?.playerOneColor){
+        if(boardQuery.isFetched && boardQuery.data?.playerOneColor){
             setPickColor(false);
-            if(boardQuery.playerOneColor === 'b'){
+            setPlayerColor(boardQuery.data.playerOneColor);
+            if(boardQuery.data.playerOneColor === 'b'){
                 setBoardPosition('black')
             }
-            
-        }
-        if(boardQuery){
-           
-            setGame((prev: typeof Chess)=>{
+            setGame(()=>{
                 //@ts-ignore
-                const game = Chess(boardQuery.Board)
-                setAiTurn(game.turn() === boardQuery.playerOneColor ? false : true)
+                const game = Chess(boardQuery.data.board)
+                setAiTurn(game.turn() === boardQuery.data?.playerOneColor ? false : true)
                 return game
             })
-            
-            
+            setAiDifficulty(boardQuery.data.ai!);
         }
+       
+   },[boardQuery.isFetched, boardQuery.isRefetching])
+        
+    
+        
 
-    },[boardQuery])
+   
 
     function makeAiMove(){
 
-        const aiMoveObj =  aiMove(game.fen(),2);
+        const aiMoveObj =  aiMove(game.fen(),aiDifficulty);
     
         setTimeout(()=>{
             const moveSet = Object.entries<string>(aiMoveObj)
@@ -79,7 +86,7 @@ export default function LocalGame(){
                 promotion: "q"
             } as ShortMove
             makeAMove(move);
-            updateBoardQuery.mutate({boardId: boardQuery!.id, board: game.fen()})
+            updateBoardQuery.mutate({boardId: boardId, board: game.fen()})
 
         },2000)
        
@@ -109,22 +116,21 @@ export default function LocalGame(){
         // illegal move
         if (move === null) return false;
 
-        const res = updateBoardQuery.mutate({boardId: boardQuery!.id, board: game.fen()})
+        const res = updateBoardQuery.mutate({boardId: boardId, board: game.fen()})
         return true;
     }
 
     async function setColor(color : string){
 
-        if(!boardQuery?.id){
-            return null
-        }
 
-        const res = await colorQuery.mutateAsync({boardId: boardQuery.id, color: color});
+        const res = await colorQuery.mutateAsync({boardId: boardId, color: color});
+        boardQuery.refetch();
 
         if(color ==='b'){
             setBoardPosition('black')
         }
-        
+
+        setPlayerColor(color)
         setPickColor(false);
 
     }
@@ -137,23 +143,60 @@ export default function LocalGame(){
         return false
     }
 
+    function deleteBoard(){
+
+        deleteBoardQuery.mutate({boardId: boardId})
+    }
+    
+    function resignGame(){
+        setGameOver(true);
+        deleteBoard();
+    }
+
+    if(game && game.game_over() && !gameOver){
+        setGameOver(true);
+    }
+
     return (
        
          <section className="flex h-full w-full justify-center items-center">
-            {!boardQuery ? 
+            {!boardQuery.isFetched ? 
             <div>
                 <Loader2 className="flex animate-spin w-64"></Loader2>
-            </div> : !pickColor && !game.game_over() ? 
-            <div>
-                <Chessboard isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
-            </div> : !pickColor && game.game_over() ?
-            <div>
-                <h1>Game Over</h1>
-            </div> : 
+            </div> : !pickColor  ? 
+            <div className="flex justify-center items-center h-full">
+                {gameOver && <div className="flex flex-col justify-around items-center absolute z-10 rounded-md bg-slate-600 w-64 h-64">
+                        <h1 className="text-3xl">{game.turn() === playerColor ? "You Lose": "You Win!"}</h1>
+                        <Link onClick={()=>deleteBoard()} className="flex justify-center items-center rounded-md font-medium bg-slate-100 text-black h-10 w-1/2" href={"/"}>Back to Home</Link>
+                    </div>}
+                {game && <Chessboard isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>}
+                {game && (
+                <div className="flex flex-col bg-slate-700 h-[80%] w-[600px] rounded-md">
+                    <div className="flex flex-col h-full w-full items-center justify-between p-3">
+                        <div className="flex flex-col h-full w-full items-center p-2 gap-2">
+                            <h1 className="text-3xl">Chat</h1>
+                            <div className="flex h-[90%] w-[90%] bg-slate-500 rounded-lg">
+
+                            </div>
+                        </div>
+                        <div className="flex w-full justify-between">
+                            <Button onClick={()=>resignGame()}>Resign</Button>
+                            <div className="flex gap-2">
+                                <Input></Input>
+                                <Button>Send</Button>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+
+                    </div>
+                </div>)} 
+            </div>
+             : boardQuery.data ?
             <div className="flex flex-col justify-center items-center gap-2">
                 <Button onClick={()=>setColor('w')}>White</Button>
                 <Button onClick={()=>setColor('b')}>Black</Button>
-            </div>}
+            </div> : <div>No Board found.</div>}
         </section>
        
     )

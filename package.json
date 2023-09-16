@@ -48,7 +48,7 @@
   },
   "devDependencies": {
     "@types/chess.js": "^0.13.5",
-    "prisma": "^3.0.0",
+    "prisma": "^5.0.0",
     "zod-prisma": "^0.5.4"
   }
 }
