@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import Link from "next/link";
 
 export default function Header(){
     const { setTheme } = useTheme();
@@ -19,7 +20,7 @@ export default function Header(){
     return (
     <section className="flex items-center justify-between p-5">
         <div className="flex gap-2 items-center w-[10%]">
-            <Image alt="" src="/logo.png" width={48} height={48} className="rounded-full"></Image>
+            <Link href='/'><Image  alt="" src="/logo.png" width={48} height={48} className="rounded-full"></Image></Link>
         </div>
         <h1 className="text-2xl">Chess Play</h1>
         <div className="flex items-center gap-2 w-[10%]">
