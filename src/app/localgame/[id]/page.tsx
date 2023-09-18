@@ -13,6 +13,8 @@ import Link from "next/link"
 import { Input } from "@/components/ui/input"
 
 
+const winConditions = ["Checkmate", "Draw", "Stalemate", "Repetition"]
+
 export default function LocalGame(){
 
     const params = useParams()
@@ -157,20 +159,26 @@ export default function LocalGame(){
         setGameOver(true);
     }
 
+
     return (
        
          <section className="flex h-full w-full justify-center items-center">
             {!boardQuery.isFetched ? 
             <div>
-                <Loader2 className="flex animate-spin w-64"></Loader2>
+                <Loader2 className="flex animate-spin w-32 h-32"></Loader2>
             </div> : !pickColor  ? 
             <div className="flex justify-center items-center h-full">
                 {gameOver && <div className="flex flex-col justify-around items-center absolute z-10 rounded-md bg-slate-600 w-64 h-64">
-                        <h1 className="text-3xl">{game.turn() === playerColor ? "You Lose": "You Win!"}</h1>
+                        {game.turn() === playerColor && game.in_checkmate() && <h1 className="text-2xl">You lost by <br></br> Checkmate</h1>}
+                        {game.turn() !== playerColor && game.in_checkmate() && <h1 className="text-2xl">You won by <br></br> Checkmate</h1>}
+                        {game.in_draw() && <h1 className="text-3xl">Draw</h1>}
+                        {game.in_stalemate() && <h1 className="text-3xl">Stalemate</h1>}
+                        {game.in_threefold_repetition() && <h1 className="text-3xl">Repetition</h1>}
                         <Link onClick={()=>deleteBoard()} className="flex justify-center items-center rounded-md font-medium bg-slate-100 text-black h-10 w-1/2" href={"/"}>Back to Home</Link>
                     </div>}
-                {game && <Chessboard isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>}
                 {game && (
+                <>
+                <Chessboard isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
                 <div className="flex flex-col bg-slate-700 h-[80%] w-[600px] rounded-md">
                     <div className="flex flex-col h-full w-full items-center justify-between p-3">
                         <div className="flex flex-col h-full w-full items-center p-2 gap-2">
@@ -190,10 +198,11 @@ export default function LocalGame(){
                     <div>
 
                     </div>
-                </div>)} 
+                </div></>)}
             </div>
              : boardQuery.data ?
             <div className="flex flex-col justify-center items-center gap-2">
+                <h1>Play As</h1>
                 <Button onClick={()=>setColor('w')}>White</Button>
                 <Button onClick={()=>setColor('b')}>Black</Button>
             </div> : <div>No Board found.</div>}
