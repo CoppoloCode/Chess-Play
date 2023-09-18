@@ -21,8 +21,7 @@ export default function LocalGame(){
 
     const params = useParams()
     const boardId = params.id as string;
-    const [socket, setSocket] = useState<Socket | null>()
-    const [isOnline, setIsOnline] = useState(false);
+    const [socket, setSocket] = useState<Socket | null>(null)
     const [pickColor, setPickColor] = useState(true);
     const [playerColor, setPlayerColor] = useState<string>("")
     const [boardPosition, setBoardPosition] = useState<BoardOrientation>('white');
@@ -37,9 +36,7 @@ export default function LocalGame(){
     const updateBoardQuery = trpc.chessGames.updateBoard.useMutation();
     const deleteBoardQuery = trpc.chessGames.removeBoard.useMutation();
 
-    useEffect(()=>{
-        setSocket(ConnectToServer(boardId))
-    },[]);
+    
 
    
    useEffect(()=>{
@@ -53,23 +50,28 @@ export default function LocalGame(){
    useEffect(()=>{
 
         if(boardQuery.isFetched && boardQuery.data?.playerOneId && boardQuery.data?.playerTwoId){
-            setIsOnline(true);
+            setSocket(ConnectToServer(boardId));
+
+        }else{
+
+            if(boardQuery.data?.playerOneColor){
+                setPickColor(false);
+                setPlayerColor(boardQuery.data.playerOneColor);
+                if(boardQuery.data.playerOneColor === 'b'){
+                    setBoardPosition('black')
+                }
+                setGame(()=>{
+                    //@ts-ignore
+                    const game = Chess(boardQuery.data.board)
+                    setAiTurn(game.turn() === boardQuery.data?.playerOneColor ? false : true)
+                    return game
+                })
+                setAiDifficulty(boardQuery.data.ai!);
+            }
+
+            
         }
         
-        if(boardQuery.isFetched && boardQuery.data?.playerOneColor){
-            setPickColor(false);
-            setPlayerColor(boardQuery.data.playerOneColor);
-            if(boardQuery.data.playerOneColor === 'b'){
-                setBoardPosition('black')
-            }
-            setGame(()=>{
-                //@ts-ignore
-                const game = Chess(boardQuery.data.board)
-                setAiTurn(game.turn() === boardQuery.data?.playerOneColor ? false : true)
-                return game
-            })
-            setAiDifficulty(boardQuery.data.ai!);
-        }
        
    },[boardQuery.isFetched, boardQuery.isRefetching])
         
