@@ -1,7 +1,6 @@
 "use client"
 import { trpc } from "@/lib/trpc/client"
 import { useParams } from "next/navigation"
-import ConnectToServer from '../../server/connect'
 //@ts-ignore
 import { aiMove } from 'js-chess-engine'
 import  Chess, {ShortMove, Square, } from "chess.js"
@@ -9,19 +8,17 @@ import { Chessboard } from "react-chessboard"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
-import { BoardOrientation, Piece, PromotionPieceOption } from "react-chessboard/dist/chessboard/types"
+import { BoardOrientation, Piece } from "react-chessboard/dist/chessboard/types"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
-import { Socket } from "socket.io-client"
 
 
-const winConditions = ["Checkmate", "Draw", "Stalemate", "Repetition"]
+
 
 export default function LocalGame(){
 
     const params = useParams()
     const boardId = params.id as string;
-    const [socket, setSocket] = useState<Socket | null>(null)
     const [pickColor, setPickColor] = useState(true);
     const [playerColor, setPlayerColor] = useState<string>("")
     const [boardPosition, setBoardPosition] = useState<BoardOrientation>('white');
@@ -49,29 +46,21 @@ export default function LocalGame(){
 
    useEffect(()=>{
 
-        if(boardQuery.isFetched && boardQuery.data?.playerOneId && boardQuery.data?.playerTwoId){
-            setSocket(ConnectToServer(boardId));
-
-        }else{
-
-            if(boardQuery.data?.playerOneColor){
-                setPickColor(false);
-                setPlayerColor(boardQuery.data.playerOneColor);
-                if(boardQuery.data.playerOneColor === 'b'){
-                    setBoardPosition('black')
-                }
-                setGame(()=>{
-                    //@ts-ignore
-                    const game = Chess(boardQuery.data.board)
-                    setAiTurn(game.turn() === boardQuery.data?.playerOneColor ? false : true)
-                    return game
-                })
-                setAiDifficulty(boardQuery.data.ai!);
-            }
-
-            
+    if(boardQuery.data?.playerOneColor){
+        setPickColor(false);
+        setPlayerColor(boardQuery.data.playerOneColor);
+        if(boardQuery.data.playerOneColor === 'b'){
+            setBoardPosition('black')
         }
-        
+        setGame(()=>{
+            //@ts-ignore
+            const game = Chess(boardQuery.data.board)
+            setAiTurn(game.turn() === boardQuery.data?.playerOneColor ? false : true)
+            return game
+        })
+        setAiDifficulty(boardQuery.data.ai!);
+    }
+
        
    },[boardQuery.isFetched, boardQuery.isRefetching])
         
@@ -183,28 +172,10 @@ export default function LocalGame(){
                         <Link onClick={()=>deleteBoard()} className="flex justify-center items-center rounded-md font-medium bg-slate-100 text-black h-10 w-1/2" href={"/"}>Back to Home</Link>
                     </div>}
                 {game && (
-                <>
-                <Chessboard autoPromoteToQueen={true} isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
-                <div className="flex flex-col bg-slate-700 h-[80%] w-[600px] rounded-md">
-                    <div className="flex flex-col h-full w-full items-center justify-between p-3">
-                        <div className="flex flex-col h-full w-full items-center p-2 gap-2">
-                            <h1 className="text-3xl">Chat</h1>
-                            <div className="flex h-[90%] w-[90%] bg-slate-500 rounded-lg">
-
-                            </div>
-                        </div>
-                        <div className="flex w-full justify-between">
-                            <Button onClick={()=>resignGame()}>Resign</Button>
-                            <div className="flex gap-2">
-                                <Input></Input>
-                                <Button>Send</Button>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-
-                    </div>
-                </div></>)}
+                <div className="flex gap-5">
+                    <Chessboard autoPromoteToQueen={true} isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
+                    <Button onClick={()=>resignGame()}>Resign</Button>
+                </div>)}
             </div>
              : boardQuery.data ?
             <div className="flex flex-col justify-center items-center gap-2">

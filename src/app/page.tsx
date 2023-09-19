@@ -17,7 +17,7 @@ export default function Home() {
 
   const user = useSession();
   const router = useRouter();
-  const createBoard = trpc.chessGames.createGame.useMutation();
+  const createGame = trpc.chessGames.createGame.useMutation();
   const [chooseAi, setChooseAi] = useState(false);
   const [loading , setLoading] = useState(false);
   
@@ -26,12 +26,19 @@ export default function Home() {
     const userId = user?.data?.user.id;
     
     setLoading(true);
-    const res = await createBoard.mutateAsync({userId: userId!, board: START_POS, ai: ai})
+    const res = await createGame.mutateAsync({userId: userId!, board: START_POS, ai: ai})
     
     router.replace(`/game/${res.id}`);
   }
 
- 
+  async function generateOnlineGame(){
+
+    const userId = user?.data?.user.id;
+
+    setLoading(true);
+    const res = await createGame.mutateAsync({userId: userId!, board: START_POS, ai: -1})
+    router.replace(`/onlinegame/${res.id}`);
+  }
 
 
   return (
@@ -39,7 +46,7 @@ export default function Home() {
       {!user.data?.user && <h1>Please Sign In</h1>}
       {!chooseAi && user.data?.user && <> 
       <Button onClick={()=>{setChooseAi(true)}}>Play Against AI</Button>
-      <Button asChild><Link href={'/'} >Play Against Human</Link></Button>
+      <Button onClick={()=>generateOnlineGame()}>Create Online Game</Button>
       <Button asChild><Link href={'/currentgames'}>View Current Games</Link></Button>
       <Button asChild><Link href={'/'}>View Profile</Link></Button></>}
       {chooseAi && !loading &&  <>

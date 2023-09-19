@@ -1,6 +1,6 @@
 
 import { db } from "@/lib/db";
-import {z} from 'zod'
+import {string, z} from 'zod'
 import { publicProcedure, router } from "../trpc";
 
 
@@ -37,6 +37,12 @@ export const chessRouter = router({
     const {boardId} = opts.input;
     const res = await db.games.delete({where:{id: boardId}});
     return res;
+  }),
+  updatePlayerTwo: publicProcedure.input(z.object({boardId: z.string(), userId: z.string()})).mutation(async (opts)=>{
+    const {boardId, userId} = opts.input;
+    const res = await db.games.update({where: {id: boardId}, data:{playerTwoId: userId}});
+    return res;
+
   })
 
 })
