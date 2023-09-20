@@ -28,6 +28,8 @@ export default function LocalGame(){
     const [gameOver, setGameOver] = useState(false);
     const [pickColor, setPickColor] = useState(true);
     const [playerResigned, setPlayerResigned] = useState(false);
+    const [message, setMessage] = useState("");
+    const [chat, setChat] = useState<Array<any>>([]);
     //@ts-ignore
     const [game, setGame] = useState<Chess | undefined>();
     const boardQuery = trpc.chessGames.getGame.useQuery({boardId});
@@ -35,12 +37,44 @@ export default function LocalGame(){
     const updatePlayerTwoQuery = trpc.chessGames.updatePlayerTwo.useMutation();
     const deleteBoardQuery = trpc.chessGames.removeBoard.useMutation();
     const colorQuery = trpc.chessGames.setColor.useMutation();
-   
+    const screenWidth = Math.abs(window?.screenX) > 800 ? 800 : 350;
+    
    useEffect(()=>{
     
     setSocket(ConnectToServer(boardId));
 
+    return ()=>{
+        socket?.disconnect()
+    }
    },[])
+
+   useEffect(() => {
+    if (!socket) return;
+  
+    socket?.on('sendBoard', (boardData)=>{
+    
+        if(boardData.board === 'resigned'){
+            setPlayerResigned(true);
+            setGameOver(true);
+        }else{
+            //@ts-ignore
+            setGame(Chess(boardData.board))
+        }
+   })
+
+    socket?.on('sendMessage', (messageData)=>{
+       
+        setChat((prev)=>{
+            prev.push({user: "opponent" , message: messageData.message});
+            return [...prev];
+        })    
+    })
+  
+    return () => {
+      socket.off("sendBoard");
+      socket.off("sendMessage");
+    };
+  }, [socket]);
         
     
     useEffect(()=>{
@@ -72,20 +106,9 @@ export default function LocalGame(){
          //@ts-ignore
          setGame(Chess(boardQuery.data?.board));
 
-    },[boardQuery.isFetched]) 
+    },[boardQuery.isFetched, boardQuery.isRefetching]) 
 
-   socket?.on('sendBoard', (boardData)=>{
-    if(boardData.board === 'resigned'){
-        setPlayerResigned(true);
-        setGameOver(true);
-    }else{
-        //@ts-ignore
-        setGame(Chess(boardData.board))
-    }
-   })
-
-    
-
+   
     function makeAMove(move: string | ShortMove){
         const gameCopy = {...game};
         const result = gameCopy.move(move);
@@ -150,6 +173,17 @@ export default function LocalGame(){
        
     }
 
+    function handleSendMessage(){
+        const messageData = {id: boardId, message: message}
+        
+        socket?.emit('sendMessage', messageData);
+        setChat((prev)=>{
+            prev.push({user: "self", message: messageData.message});
+            return [...prev];
+        })
+        setMessage("");
+    }
+
     if(game && game.game_over() && !gameOver){
         setGameOver(true);
     }
@@ -174,29 +208,29 @@ export default function LocalGame(){
                     <Link onClick={()=>deleteBoard()} className="flex justify-center items-center rounded-md font-medium bg-slate-100 text-black h-10 w-1/2" href={"/"}>Back to Home</Link>
                 </div>}
             {game && (
-            <div className="flex gap-5 h-full justify-center items-center">
+            <div className="flex flex-col md:flex-row gap-5 h-full justify-center items-center">
                 <div>
                     <h1>Invite Code: {boardId}</h1>
-                    <Chessboard autoPromoteToQueen={true} isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
+                    <Chessboard autoPromoteToQueen={true} isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={screenWidth} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
                 </div>
-                <div className="flex flex-col bg-slate-700 h-[80%]  rounded-md">
-                    <div className="flex flex-col h-full w-full items-center justify-between p-3">
-                        <div className="flex flex-col h-full w-full items-center p-2 gap-2">
-                            <h1 className="text-3xl">Chat</h1>
-                            <div className="flex h-[90%] w-[90%] bg-slate-500 rounded-lg">
-
-                            </div>
-                        </div>
-                        <div className="flex w-full justify-between">
-                            <Button onClick={()=>resignGame()}>Resign</Button>
-                            <div className="flex gap-2">
-                                <Input></Input>
-                                <Button>Send</Button>
-                            </div>
+                <div className="flex flex-col bg-slate-700 h-[32rem] rounded-md p-3">
+                    <div className="flex flex-col h-full w-full items-center p-2 gap-2">
+                        <h1 className="text-3xl">Chat</h1>
+                        <div className="flex flex-col h-[90%] w-[90%] bg-slate-500 rounded-lg p-5 overflow-y-scroll">
+                            {chat.map((message, indx)=>{
+                                if(message.user === "opponent"){
+                                    return <div key={indx} className="flex items-center"><p>{message.message}</p></div>
+                                } 
+                                return <div key={indx} className="flex justify-end items-center"><p>{message.message}</p></div>
+                            })}
                         </div>
                     </div>
-                    <div>
-
+                    <div className="flex w-full justify-between">
+                        <Button onClick={()=>resignGame()}>Resign</Button>
+                        <div className="flex gap-2">
+                            <Input onChange={(e)=>setMessage(e.target.value)}></Input>
+                            <Button onClick={()=>handleSendMessage()}>Send</Button>
+                        </div>
                     </div>
                 </div>
             </div>)}

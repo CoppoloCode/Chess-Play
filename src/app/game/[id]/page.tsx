@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { BoardOrientation, Piece } from "react-chessboard/dist/chessboard/types"
 import Link from "next/link"
-import { Input } from "@/components/ui/input"
 
 
 
@@ -33,9 +32,9 @@ export default function LocalGame(){
     const updateBoardQuery = trpc.chessGames.updateBoard.useMutation();
     const deleteBoardQuery = trpc.chessGames.removeBoard.useMutation();
 
-    
+    const screenWidth = Math.abs(window?.screenX) > 800 ? 800 : 350;
 
-   
+  
    useEffect(()=>{
     
        if(aiTurn && !gameOver){
@@ -161,7 +160,7 @@ export default function LocalGame(){
             <div>
                 <Loader2 className="flex animate-spin w-32 h-32"></Loader2>
             </div> : !pickColor  ? 
-            <div className="flex justify-center items-center h-full">
+            <div className="flex justify-center items-center">
                 {gameOver && <div className="flex flex-col justify-around items-center absolute z-10 rounded-md bg-slate-600 w-64 h-64">
                         {game.turn() === playerColor && game.in_checkmate() && <h1 className="text-2xl">You lost by <br></br> Checkmate</h1>}
                         {game.turn() !== playerColor && game.in_checkmate() && <h1 className="text-2xl">You won by <br></br> Checkmate</h1>}
@@ -172,8 +171,8 @@ export default function LocalGame(){
                         <Link onClick={()=>deleteBoard()} className="flex justify-center items-center rounded-md font-medium bg-slate-100 text-black h-10 w-1/2" href={"/"}>Back to Home</Link>
                     </div>}
                 {game && (
-                <div className="flex gap-5">
-                    <Chessboard autoPromoteToQueen={true} isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} boardWidth={800} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
+                <div className="flex flex-col md:flex-row gap-5 w-full h-full">
+                    <Chessboard boardWidth={screenWidth} autoPromoteToQueen={true} isDraggablePiece={({piece})=>isYourColor(piece)} boardOrientation={boardPosition} position={game.fen()} onPieceDrop={onDrop}></Chessboard>
                     <Button onClick={()=>resignGame()}>Resign</Button>
                 </div>)}
             </div>

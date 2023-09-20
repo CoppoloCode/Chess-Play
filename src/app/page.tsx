@@ -44,11 +44,12 @@ export default function Home() {
   return (
     <section className='flex flex-col w-full h-full gap-2 justify-center items-center'>
       {!user.data?.user && <h1>Please Sign In</h1>}
-      {!chooseAi && user.data?.user && <> 
-      <Button onClick={()=>{setChooseAi(true)}}>Play Against AI</Button>
-      <Button onClick={()=>generateOnlineGame()}>Create Online Game</Button>
-      <Button asChild><Link href={'/currentgames'}>View Current Games</Link></Button>
-      <Button asChild><Link href={'/'}>View Profile</Link></Button></>}
+      {!chooseAi && user.data?.user && !loading && <> 
+      <Button className="w-56" onClick={()=>{setChooseAi(true)}}>Play Against AI</Button>
+      <Button className="w-56" onClick={()=>generateOnlineGame()}>Create Online Game</Button>
+      <Button className="w-56" asChild><Link href={'/joingame'}>Join Game</Link></Button>
+      <Button className="w-56" asChild><Link href={'/currentgames'}>View Current Games</Link></Button>
+      <Button className="w-56" asChild><Link href={'/'}>View Profile</Link></Button></>}
       {chooseAi && !loading &&  <>
       <Button className="w-24" onClick={()=>{generateLocalGame(0)}}>Easy</Button>
       <Button className="w-24" onClick={()=>{generateLocalGame(1)}}>Medium</Button>
