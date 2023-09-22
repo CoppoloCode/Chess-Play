@@ -14,12 +14,11 @@ export default function JoinGame() {
   
   
   return (
-    <section className='flex flex-col w-full h-full gap-2 items-center pt-36'>
-      <h1 className="text-2xl">Invite Code:</h1>
-      <form className="flex flex-col justify-center gap-2 items-center">
-        <Input minLength={25} maxLength={25} required onChange={(e)=>setCode(e.target.value)} className="w-fit"></Input>
-        {code.length === 25 && <Button type="submit" asChild><Link  type="submit" href={`/onlinegame/${code}`}>Join Game</Link></Button> }
-      </form>
+    <section className='flex flex-col w-full h-full gap-6 items-center pt-36'>
+      <h1 className="text-5xl">Invite Code</h1>
+      <Input minLength={25} maxLength={25} required onChange={(e)=>setCode(e.target.value)} className="w-[40%] text-4xl text-center"></Input>
+      {code.length === 25 && <Button type="submit" asChild><Link  type="submit" href={`/onlinegame/${code}`}>Join Game</Link></Button> }
+      
     </section>
   )
 }

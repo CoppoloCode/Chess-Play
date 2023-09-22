@@ -21,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
        
-      <body className={"flex flex-col w-screen"}>
+      <body className={"flex flex-col w-screen h-screen"}>
         <NextAuthProvider>
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
             <TrpcProvider>

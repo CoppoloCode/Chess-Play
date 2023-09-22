@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
 import { BoardOrientation, Piece } from "react-chessboard/dist/chessboard/types"
 import Link from "next/link"
+import Image from "next/image"
 
 
 
@@ -177,10 +178,12 @@ export default function LocalGame(){
                 </div>)}
             </div>
              : boardQuery.data ?
-            <div className="flex flex-col justify-center items-center gap-2">
-                <h1>Play As</h1>
-                <Button onClick={()=>setColor('w')}>White</Button>
-                <Button onClick={()=>setColor('b')}>Black</Button>
+            <div className="flex flex-col justify-center items-center gap-2 pb-36">
+                <h1 className="text-4xl">Choose Color</h1>
+                <div className="flex gap-6">
+                    <Button className="h-fit bg-transparent" onClick={()=>setColor('w')}><Image width={128} height={128} alt="" src="/white-pawn.png"></Image></Button>
+                    <Button className="h-fit bg-transparent" onClick={()=>setColor('b')}><Image width={128} height={128} alt="" src="/black-pawn.png"></Image></Button>
+                </div>
             </div> : <div>No Board found.</div>}
         </section>
        

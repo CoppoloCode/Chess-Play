@@ -14,6 +14,7 @@ import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Socket } from "socket.io-client"
 import { useSession } from "next-auth/react"
+import Image from "next/image"
 
 
 export default function LocalGame(){
@@ -237,10 +238,12 @@ export default function LocalGame(){
         </div>
          : boardQuery.data ?
         <div className="flex flex-col justify-center items-center gap-2">
-            <h1>Play As</h1>
-            <Button onClick={()=>setColor('w')}>White</Button>
-            <Button onClick={()=>setColor('b')}>Black</Button>
-        </div> : <div>No Board found.</div>}
+            <h1 className="text-4xl">Choose Color</h1>
+            <div className="flex gap-6">
+                    <Button className="h-fit bg-transparent" onClick={()=>setColor('w')}><Image width={128} height={128} alt="" src="/white-pawn.png"></Image></Button>
+                    <Button className="h-fit bg-transparent" onClick={()=>setColor('b')}><Image width={128} height={128} alt="" src="/black-pawn.png"></Image></Button>
+            </div>
+        </div> : <div>Game Not Found.</div>}
     </section>
        
     )
