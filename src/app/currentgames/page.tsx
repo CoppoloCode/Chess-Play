@@ -1,6 +1,5 @@
 "use client"
 
-import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc/client"
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -24,7 +23,7 @@ export default function CurrentGames(){
     
     return (
         <section className="flex flex-col h-full justify-center items-center gap-2">
-            {currentGamesQuery.isFetched && currentGamesQuery.data!.length > 0  && currentGamesQuery.data?.map((game, indx)=>{
+            {currentGamesQuery.isFetched && currentGamesQuery.data!.length > 0  && currentGamesQuery.data?.map((game : any , indx : number)=>{
                 return <Link key={indx} className="flex justify-center items-center rounded-md font-medium bg-slate-100 text-black h-10 w-64" href={game.ai !== -1 ? `/game/${game.id}` : `/onlinegame/${game.id}`}>{game.ai !== -1 ?`Resume game with ${difficulty[game.ai!]} AI` : "Resume online game"}</Link>
             })}
             {currentGamesQuery.isFetched && currentGamesQuery.data!.length === 0 && <h1>No active games.</h1>}
