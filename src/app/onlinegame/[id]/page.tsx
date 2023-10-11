@@ -2,14 +2,12 @@
 import { trpc } from "@/lib/trpc/client"
 import { useParams } from "next/navigation"
 import ConnectToServer from '../../server/connect'
-//@ts-ignore
-import { aiMove } from 'js-chess-engine'
 import  Chess, {ShortMove, Square, } from "chess.js"
 import { Chessboard } from "react-chessboard"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Loader2 } from "lucide-react"
-import { BoardOrientation, Piece, PromotionPieceOption } from "react-chessboard/dist/chessboard/types"
+import { BoardOrientation, Piece } from "react-chessboard/dist/chessboard/types"
 import Link from "next/link"
 import { Input } from "@/components/ui/input"
 import { Socket } from "socket.io-client"
