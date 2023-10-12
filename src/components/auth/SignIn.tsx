@@ -1,6 +1,7 @@
 "use client";
 import { useSession, signIn, signOut } from "next-auth/react";
 import { Button } from "../ui/button";
+import Router from "next/router";
 
 export default function SignIn() {
   const { data: session, status } = useSession();
@@ -10,7 +11,7 @@ export default function SignIn() {
   if (session) {
     return (
       <>
-        <Button variant={"destructive"} onClick={() => signOut()}>Sign out</Button>
+        <Button variant={"destructive"} onClick={() => {signOut(); Router.replace('/')}}>Sign out</Button>
       </>
     );
   }
