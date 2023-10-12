@@ -33,8 +33,7 @@ export default function LocalGame(){
     const updateBoardQuery = trpc.chessGames.updateBoard.useMutation();
     const deleteBoardQuery = trpc.chessGames.removeBoard.useMutation();
 
-    const screenWidth = Math.abs(window?.screenX) > 800 ? 800 : 350;
-
+    const screenWidth = Math.abs(window?.screen.width) > 800 ? 800 : 350;
   
    useEffect(()=>{
     

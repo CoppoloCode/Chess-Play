@@ -36,7 +36,7 @@ export default function LocalGame(){
     const updatePlayerTwoQuery = trpc.chessGames.updatePlayerTwo.useMutation();
     const deleteBoardQuery = trpc.chessGames.removeBoard.useMutation();
     const colorQuery = trpc.chessGames.setColor.useMutation();
-    const screenWidth = Math.abs(window?.screenX) > 800 ? 800 : 350;
+    const screenWidth = Math.abs(window?.screen.width) > 800 ? 800 : 350;
     
    useEffect(()=>{
     
